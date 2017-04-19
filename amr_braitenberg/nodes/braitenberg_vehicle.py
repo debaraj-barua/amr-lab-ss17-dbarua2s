@@ -77,8 +77,9 @@ class BraitenbergVehicleNode:
         ==================================================================
         """
         ws = WheelSpeeds()
-
-
+        ws.speeds[0],ws.speeds[1]=self._vehicle.compute_wheel_speeds(ranges_msg.ranges[0].range,
+                                                      ranges_msg.ranges[1].range)
+        self._wheel_speeds_publisher.publish(ws)                            
         # Output the debug info:
         rospy.logdebug('[{:.2f}, {:.2f}] --> [{:.2f}, {:.2f}]'.format(
                                                       ranges_msg.ranges[0].range,
@@ -100,7 +101,8 @@ class BraitenbergVehicleNode:
         Hint: see the logdebug message below for an example how to access config parameters.
         ==================================================================
         """
-
+        
+        self._vehicle.set_params(config.type, config.factor1, config.factor2)
 
         rospy.logdebug('Vehicle reconfigured: type {}, '
                        'factors {:.2f}] and {:.2f}]'.format(
