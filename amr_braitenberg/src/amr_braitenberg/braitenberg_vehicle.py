@@ -34,7 +34,23 @@ class BraitenbergVehicle:
         (in interval [0..1])
         ========================================================
         """
+        ws1=0.0
+        ws2=0.0
+        if (self._vehicle_type==0):
+            ws1=0.0
+            ws2=0.0   
+
+        elif (self._vehicle_type==1):
+            ws1=0.0
+            ws2=0.0   
+
+        elif (self._vehicle_type==2):
+            ws1=0.0
+            ws2=0.0   
+
+        else:
+            ws1=0.0
+            ws2=0.0   
 
 
-
-        return (0.0, 0.0)
+        return (ws1, ws2)
