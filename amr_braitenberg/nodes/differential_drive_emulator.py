@@ -33,11 +33,18 @@ class DifferentialDriveEmulatorNode:
             You may lookup the geometry_msgs.msg declaration at ros.org
             ========================================================
             """
+            angular_vel=((msg.speeds[1]-msg.speeds[0])/(self._wheel_diameter/2)) #stores angular velocity
+            linear_vel=((msg.speeds[1]+msg.speeds[0])/2)                         #stores linear velocity
+            
+            twist.angular=angular_vel       #stores angular component of twist message
+            twist.linear=linear_vel         #stores linear component of twist message
+            
             self._velocity_publisher.publish(twist)
             rospy.logdebug('[{:.2f} {:.2f}] --> [{:.2f} {:.2f}]'.format(msg.speeds[0],
                                                                         msg.speeds[1],
                                                                         twist.linear.x,
-                                                                        twist.angular.z))
+                                                                        twist.angular.z))            
+            
 if __name__ == '__main__':
     n = DifferentialDriveEmulatorNode()
     rospy.spin()
