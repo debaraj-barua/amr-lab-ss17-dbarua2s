@@ -1,13 +1,9 @@
 #!/usr/bin/env python
-
 PACKAGE = 'amr_braitenberg'
 NODE = 'differential_drive_emulator'
-
 import rospy
 from geometry_msgs.msg import Twist
 from amr_msgs.msg import WheelSpeeds
-
-
 class DifferentialDriveEmulatorNode:
     
     def __init__(self):
@@ -22,8 +18,6 @@ class DifferentialDriveEmulatorNode:
                                                         queue_size=100)
         self._velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         rospy.loginfo('Started differential drive emulator node.')
-
-
     def _wheel_speed_callback(self, msg):
         if len(msg.speeds)!=2:
             rospy.logwarn('Ignoring WheelSpeeds message because it does not '
@@ -36,18 +30,14 @@ class DifferentialDriveEmulatorNode:
             Instructions: compute linear and angular components based
                           on robot geometrical parameters and
                           fill in the twist message.
-
             You may lookup the geometry_msgs.msg declaration at ros.org
             ========================================================
             """
-
             self._velocity_publisher.publish(twist)
             rospy.logdebug('[{:.2f} {:.2f}] --> [{:.2f} {:.2f}]'.format(msg.speeds[0],
                                                                         msg.speeds[1],
                                                                         twist.linear.x,
                                                                         twist.angular.z))
-
-
 if __name__ == '__main__':
     n = DifferentialDriveEmulatorNode()
     rospy.spin()
