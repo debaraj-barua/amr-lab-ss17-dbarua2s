@@ -37,18 +37,31 @@ class BraitenbergVehicle:
         ws1=0.0
         ws2=0.0
         if (self._vehicle_type==0):
+            
+            print "0000000000000000000000000000000000"
+            print "left_in: ",left_in
+            print "right_in: ",right_in
             ws1=0.0
             ws2=0.0   
 
         elif (self._vehicle_type==1):
+            print "1111111111111111111111111111111111"
+            print "left_in: ",left_in
+            print "right_in: ",right_in
             ws1=0.0
             ws2=0.0   
 
         elif (self._vehicle_type==2):
+            print "2222222222222222222222222222222222"
+            print "left_in: ",left_in
+            print "right_in: ",right_in
             ws1=0.0
             ws2=0.0   
 
         else:
+            print "ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+            print "left_in: ",left_in
+            print "right_in: ",right_in            
             ws1=0.0
             ws2=0.0   
 

@@ -77,7 +77,7 @@ class BraitenbergVehicleNode:
         ==================================================================
         """
         ws = WheelSpeeds()
-        ws.speeds[0],ws.speeds[1]=self._vehicle.compute_wheel_speeds(ranges_msg.ranges[0].range,
+        ws.speeds=self._vehicle.compute_wheel_speeds(ranges_msg.ranges[0].range,
                                                       ranges_msg.ranges[1].range)
         self._wheel_speeds_publisher.publish(ws)                            
         # Output the debug info:
