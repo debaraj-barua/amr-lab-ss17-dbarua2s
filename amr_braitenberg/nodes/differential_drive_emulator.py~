@@ -36,7 +36,7 @@ class DifferentialDriveEmulatorNode:
             angular_vel=((msg.speeds[1]-msg.speeds[0])/(self._wheel_diameter/2)) #stores angular velocity
             linear_vel=((msg.speeds[1]+msg.speeds[0])/2)                         #stores linear velocity
             
-            twist.angular.z=angular_vel       #stores angular component of twist message
+            twist.angula.zr=angular_vel       #stores angular component of twist message
             twist.linear.x=linear_vel         #stores linear component of twist message
             
             self._velocity_publisher.publish(twist)
