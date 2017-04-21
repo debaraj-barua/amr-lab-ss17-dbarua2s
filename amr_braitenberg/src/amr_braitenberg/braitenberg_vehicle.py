@@ -42,22 +42,22 @@ class BraitenbergVehicle:
         
         @c ws1, ws2: These variables store wheel speeds for left and right wheels respectively.
         
-        @c max_range: This variable stores maximum range of the sonar sensor
+        @c max_range: This variable stores maximum range of the sonar sensor which is 4
         
         @c normalized_left,normalized_right:
                     This variable is used to store normalized sensor readings 
                     scaled by maximum range.
                     For normalized_left, this is calculated by: 
-                            (max_range-left_in)/max_range
+                            (left_in)/max_range
                     This will result in a value between 0 and 1. 
                     
         """
         
         ws1=0.0
         ws2=0.0
-        max_range=5
-        normalized_left=(max_range-left_in)/max_range       
-        normalized_right=(max_range-right_in)/max_range     
+        max_range=4
+        normalized_left=(left_in)/max_range       
+        normalized_right=(right_in)/max_range     
 
         if (self._vehicle_type==0):
             
@@ -71,8 +71,8 @@ class BraitenbergVehicle:
 
         elif (self._vehicle_type==2):
             
-            ws1=(normalized_right+normalized_left)*self._f_1
-            ws2=(normalized_right+normalized_left)*self._f_2 
+            ws1=(normalized_left*self._f_1+normalized_right*self._f_2)
+            ws2=(normalized_left*self._f_1+normalized_right*self._f_2)
 
         else:
             """

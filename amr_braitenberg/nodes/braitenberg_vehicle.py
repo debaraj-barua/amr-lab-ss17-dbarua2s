@@ -76,6 +76,13 @@ class BraitenbergVehicleNode:
         Hint: use self._vehicle.compute_wheel_speeds(...) function
         ==================================================================
         """
+        """
+        @param ranges_msg: stores the sonar messages
+        
+        we call the function _vehicle.compute_wheel_speeds to get the right 
+        and left wheel speeds and publish it to /cmd_vel_diff topic
+        """
+        
         ws = WheelSpeeds()
         ws.speeds=self._vehicle.compute_wheel_speeds(ranges_msg.ranges[0].range,
                                                       ranges_msg.ranges[1].range)

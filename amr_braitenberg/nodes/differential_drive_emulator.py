@@ -33,8 +33,15 @@ class DifferentialDriveEmulatorNode:
             You may lookup the geometry_msgs.msg declaration at ros.org
             ========================================================
             """
-            angular_vel=((msg.speeds[1]-msg.speeds[0])/(self._wheel_diameter/2)) #stores angular velocity
-            linear_vel=((msg.speeds[1]+msg.speeds[0])/2)                         #stores linear velocity
+            """
+            @c angular_vel: stores the angular speed of the robot. 
+                            This is calculated by the difference between the right and left wheel
+                            speeds divided by  the radius of the wheel
+            @c linear_vel:  stores the linear velocity and is given by the average of the 
+                            right and left wheel speeds
+            """
+            angular_vel=((msg.speeds[0]-msg.speeds[1])/(self._wheel_diameter/2)) #stores angular velocity
+            linear_vel=((msg.speeds[0]+msg.speeds[1])/2)                         #stores linear velocity
             
             twist.angular.z=angular_vel       #stores angular component of twist message
             twist.linear.x=linear_vel         #stores linear component of twist message
