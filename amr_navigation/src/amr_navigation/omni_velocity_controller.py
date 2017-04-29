@@ -5,7 +5,6 @@ import rospy
 from math import sqrt,cos,sin, atan2,copysign
 from velocity_controller import VelocityController, Velocity
 from velocity_controller import get_shortest_angle, get_distance
-from geometry_msgs.msg import Twist
 
 class OmniVelocityController(VelocityController):
     """
@@ -41,6 +40,22 @@ class OmniVelocityController(VelocityController):
             self._max_l_acc = max_linear_acceleration*(-1) #since we are using only deacceleration
             self._max_a_acc = max_angular_acceleration*(-1) #since we are using only deacceleration
     
+    """
+    'a' refers to angular component and 'l' refers to linear component
+    
+    @c      initial_l_vel, initial_a_vel: Stores magnitude of velocity
+    @c      pose_theta                  : Stores the angle of the velocity vector to the X-axis
+    @c      linear_dist,angular_dist    : Stores linear and angular distance to target
+    @c      l_dist_stop, a_dist_stop    : Stores distance required for deaccelerating to 0 from maximum speed
+    @c      l_dist_unacc, a_dist_unacc  : Stores the distance till point of deacceleration, i.e., (linear_dist-l_dist_stop)
+    @c      linear_vel, angular_vel     : Stores effective velocity to be published
+    @c      linear_vel_x, linear_vel_y  : Stores X and Y component of linear_vel
+    @c      l_time, a_time              : Stores time required to complete motion, used for scaling velocities    
+    @c      scaled_l_vel,scaled_a_vel   : Stores scaled down values of velocities so that both angular and linear motions finish simulteneously
+    
+    """    
+
+    
     def compute_velocity(self, actual_pose):
             rospy.loginfo(actual_pose)
             
@@ -64,8 +79,6 @@ class OmniVelocityController(VelocityController):
                 rospy.loginfo(actual_pose)            
                 self._linear_complete = True
                 self._angular_complete = True
-                rospy.set_param('current_linear_vel',self._l_max_vel )
-                rospy.set_param('current_angular_vel',self._a_max_vel )
                 return Velocity()
             
             #calculate distance to stop
@@ -162,26 +175,11 @@ class OmniVelocityController(VelocityController):
                                self._a_tolerance))
                 rospy.loginfo(copysign(angular_vel, angular_dist))
           
-            rospy.set_param('current_linear_vel',copysign(linear_vel, linear_dist))
-            rospy.set_param('current_angular_vel',copysign(angular_vel, angular_dist))
             return Velocity(copysign(linear_vel_x, dx),
                             copysign(linear_vel_y, dy),
                             copysign(angular_vel, angular_dist))
             
-            
-"""               
-            return Velocity(linear_vel_x,
-                linear_vel_y,
-                angular_vel)
-            
-            
-         
 
-            
-            
-"""            
-            
-            
             
             
             
