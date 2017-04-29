@@ -2,10 +2,10 @@
 
 PACKAGE = 'amr_navigation'
 import rospy
-
-from math import atan2, copysign,cos,sin
+from math import sqrt,cos,sin, atan2,copysign
 from velocity_controller import VelocityController, Velocity
 from velocity_controller import get_shortest_angle, get_distance
+from geometry_msgs.msg import Twist
 
 class OmniVelocityController(VelocityController):
     """
@@ -38,69 +38,150 @@ class OmniVelocityController(VelocityController):
             self._l_tolerance = l_tolerance
             self._a_max_vel = a_max_vel
             self._a_tolerance = a_tolerance
-            self._max_l_acc = max_linear_acceleration
-            self._max_a_acc = max_angular_acceleration
+            self._max_l_acc = max_linear_acceleration*(-1) #since we are using only deacceleration
+            self._max_a_acc = max_angular_acceleration*(-1) #since we are using only deacceleration
     
     def compute_velocity(self, actual_pose):
+            rospy.loginfo(actual_pose)
             
-           # Displacement and orientation to the target in world frame:
+            initial_l_vel=abs(self._l_max_vel)
+            initial_a_vel=abs(self._a_max_vel)
+            
+            #Displacement and orientation to the target in world frame:
             dx = self._target_pose.x - actual_pose.x
             dy = self._target_pose.y - actual_pose.y
             pose_theta=get_shortest_angle(atan2(dy, dx),actual_pose.theta)
-
+            
             # Step 1: compute remaining distances
             linear_dist = get_distance(self._target_pose, actual_pose)
             angular_dist = get_shortest_angle(self._target_pose.theta, actual_pose.theta)
-            
-             #calculate distance for fixed velocity and deaccelerated velocity
-            dist_accelerated=(self._a_max_vel*self._a_max_vel)/(2*self._max_l_acc)            
-            dist_nonaccelerated =  linear_dist - dist_accelerated
-
-            if (    abs(linear_dist)<self._l_tolerance and
-                    abs(angular_dist)<self._a_tolerance):
+              
+            #Checking if target is reached
+            if (abs(linear_dist)<self._l_tolerance and
+                abs(angular_dist)<self._a_tolerance     ):
+                
+                rospy.loginfo("Completing.....")  
+                rospy.loginfo(actual_pose)            
                 self._linear_complete = True
                 self._angular_complete = True
+                rospy.set_param('current_linear_vel',self._l_max_vel )
+                rospy.set_param('current_angular_vel',self._a_max_vel )
                 return Velocity()
+            
+            #calculate distance to stop
+            l_dist_stop=abs(-(self._l_max_vel**2)/(2*self._max_l_acc))
+            a_dist_stop=abs(-(self._a_max_vel**2)/(2*self._max_a_acc))            
+            
+            #calculate distance for fixed velocity and deaccelerated velocity
+            l_dist_unacc =  abs(linear_dist - l_dist_stop)
+            a_dist_unacc=   abs(angular_dist - a_dist_stop)
+           
 
+            
+            
+            
             # Step 2: compute velocities
-            linear_vel_x, linear_vel_y, angular_vel = 0, 0, 0
+            linear_vel, linear_vel_x, linear_vel_y, angular_vel = 0, 0, 0, 0   
+            scaled_l_vel,scaled_a_vel=0,0
             
+            
+            if(linear_dist<l_dist_stop and angular_dist< a_dist_stop):
+                #Deaccelerate  both (A) 
+                rospy.loginfo("Undergoing Linear and angular deacceleration")
 
-            #Non accelerated motoion:
-            l_time=linear_dist/self._l_max_vel
-            a_time=angular_dist/self._a_max_vel      
-            
-            
-            
-                         
-          #  w_turn = ((pose_theta-angular_dist)/angular_dist)
-            
-            l_time=linear_dist/self._l_max_vel
-            a_time=angular_dist/self._a_max_vel      
-       
+                linear_vel=abs(sqrt(abs(-(2*self._max_l_acc*linear_dist))))
+                angular_vel=abs(sqrt(abs(-(2*self._max_a_acc*angular_dist)))) 
+                
+                l_time=abs((-(linear_vel)/self._max_l_acc))
+                a_time=abs((-(angular_vel)/self._max_a_acc))
+           
+                            
+            elif(linear_dist>l_dist_stop and angular_dist< a_dist_stop):
+                #Deaccelerate angular (B)
+                rospy.loginfo("Undergoing angular deacceleration")
+
+                linear_vel=abs(initial_l_vel)
+                angular_vel=abs(sqrt(abs(-(2*self._max_a_acc*angular_dist))) )
+                
+                l_time_1=(l_dist_unacc/linear_vel)
+                l_time_2=abs((-(linear_vel)/self._max_l_acc))
+                l_time=l_time_1+l_time_2
+                
+                a_time=abs((-(angular_vel)/self._max_a_acc))
+                
+            elif(linear_dist<l_dist_stop and angular_dist>a_dist_stop):
+                #Deaccelerate linear (C)
+                rospy.loginfo("Undergoing linear deacceleration")
+                linear_vel=abs(sqrt(abs(-(2*self._max_l_acc*linear_dist))))
+                angular_vel=abs(initial_a_vel)
+                
+                a_time_1=(a_dist_unacc/angular_vel)
+                a_time_2=abs((-(angular_vel)/self._max_a_acc))
+                a_time=a_time_1+a_time_2
+                
+                l_time=abs((-(linear_vel)/self._max_l_acc))
+                
+
+
+            elif(linear_dist>l_dist_stop and angular_dist>a_dist_stop):
+                #No deacceleration (D)
+                rospy.loginfo("No deacceleration")
+                
+                linear_vel=abs(initial_l_vel)
+                angular_vel=abs(initial_a_vel)
+
+                l_time_1=(l_dist_unacc/linear_vel)
+                l_time_2=abs((-(linear_vel)/self._max_l_acc))
+                l_time=l_time_1+l_time_2
+                
+                a_time_1=(a_dist_unacc/angular_vel)
+                a_time_2=abs((-(angular_vel)/self._max_a_acc))
+                a_time=a_time_1+a_time_2                
+
+            #scaling velocities so that both motion ends at same time             
             if (a_time<l_time):
-                scaled_a_vel=self._a_max_vel*(a_time/l_time)
-                scaled_l_vel=self._l_max_vel
+                    scaled_a_vel=angular_vel*(a_time/l_time)
+                    scaled_l_vel=linear_vel
             else :
-                scaled_a_vel=self._a_max_vel
-                scaled_l_vel=self._l_max_vel*(l_time/a_time)             
-            
-            
-            
+                    scaled_a_vel=angular_vel
+                    scaled_l_vel=linear_vel*(l_time/a_time)         
             
             if abs(linear_dist)>self._l_tolerance:
-                
-                linear_vel_x = (scaled_l_vel*cos(pose_theta) if abs(linear_dist)>5*self._l_tolerance else
-                               self._l_tolerance*cos(pose_theta))
-                linear_vel_y = (scaled_l_vel*sin(pose_theta) if abs(linear_dist)>5*self._l_tolerance else
-                               self._l_tolerance*sin(pose_theta))
+                rospy.loginfo("Calculating Linear vel") 
+                linear_vel_x = abs((scaled_l_vel*cos(pose_theta) if abs(linear_dist)>self._l_tolerance else
+                               self._l_tolerance*cos(pose_theta)))
+                linear_vel_y = abs((scaled_l_vel*sin(pose_theta) if abs(linear_dist)>self._l_tolerance else
+                               self._l_tolerance*sin(pose_theta)))
+                linear_vel=abs(sqrt(linear_vel_x**2+linear_vel_y**2))
+                rospy.loginfo(copysign(linear_vel, linear_dist))  
+                rospy.loginfo(copysign(linear_vel_x, dx))  
+                rospy.loginfo(copysign(linear_vel_y, dy))
             if abs(angular_dist)>self._a_tolerance:
-                
-                      
-                angular_vel=(scaled_a_vel if abs(angular_dist)>5*self._a_tolerance else
-                               self._a_tolerance*(a_time/l_time))
-             
-            rospy.loginfo(actual_pose)
+                rospy.loginfo("Calculating angular vel")
+                angular_vel=abs((scaled_a_vel if abs(angular_dist)>self._a_tolerance else
+                               self._a_tolerance))
+                rospy.loginfo(copysign(angular_vel, angular_dist))
+          
+            rospy.set_param('current_linear_vel',copysign(linear_vel, linear_dist))
+            rospy.set_param('current_angular_vel',copysign(angular_vel, angular_dist))
+            return Velocity(copysign(linear_vel_x, dx),
+                            copysign(linear_vel_y, dy),
+                            copysign(angular_vel, angular_dist))
+            
+            
+"""               
             return Velocity(linear_vel_x,
-                            linear_vel_y,
-                            angular_vel)
+                linear_vel_y,
+                angular_vel)
+            
+            
+         
+
+            
+            
+"""            
+            
+            
+            
+            
+            
