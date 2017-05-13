@@ -20,8 +20,8 @@ window
 (
   size [ 594 622 ] # in pixels
   scale 36.995   # pixels per meter
-  center [ 0.000 0.000 ]
-  rotate [ 0.000 0.000 ]
+  center [ -0.542 0.048 ]
+  rotate [ 19.000 -0.500 ]
   show_data 1
 )
 
@@ -38,7 +38,7 @@ youbot
 (
   # can refer to the robot by this name
   name "robot1"
-  pose [ -2.773 -0.007 0.000 27.684 ]
+  pose [ -5.412 -3.519 0.000 130.791 ]
 
   hokuyolaser( pose [ 0.320 0.000 -0.120 0.000 ] )
   p2dx_sonar( pose [0.000 0.000 0.000 0.000] )
