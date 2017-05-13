@@ -55,10 +55,10 @@ namespace amr_stage
     class ParamDescription : public AbstractParamDescription
     {
     public:
-      ParamDescription(std::string name, std::string type, uint32_t level, 
-          std::string description, std::string edit_method, T StageConfig::* f) :
-        AbstractParamDescription(name, type, level, description, edit_method),
-        field(f)
+      ParamDescription(std::string a_name, std::string a_type, uint32_t a_level, 
+          std::string a_description, std::string a_edit_method, T StageConfig::* a_f) :
+        AbstractParamDescription(a_name, a_type, a_level, a_description, a_edit_method),
+        field(a_f)
       {}
 
       T (StageConfig::* field);
@@ -141,7 +141,7 @@ namespace amr_stage
     class GroupDescription : public AbstractGroupDescription
     {
     public:
-      GroupDescription(std::string name, std::string type, int parent, int id, bool s, T PT::* f) : AbstractGroupDescription(name, type, parent, id, s), field(f)
+      GroupDescription(std::string a_name, std::string a_type, int a_parent, int a_id, bool a_s, T PT::* a_f) : AbstractGroupDescription(a_name, a_type, a_parent, a_id, a_s), field(a_f)
       {
       }
 
@@ -240,7 +240,7 @@ class DEFAULT
 
 
 
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       double speed;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -367,6 +367,9 @@ class DEFAULT
   template <> // Max and min are ignored for strings.
   inline void StageConfig::ParamDescription<std::string>::clamp(StageConfig &config, const StageConfig &max, const StageConfig &min) const
   {
+    (void) config;
+    (void) min;
+    (void) max;
     return;
   }
 
@@ -377,21 +380,21 @@ class DEFAULT
     StageConfigStatics()
     {
 StageConfig::GroupDescription<StageConfig::DEFAULT, StageConfig> Default("Default", "", 0, 0, true, &StageConfig::groups);
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __min__.speed = 1.0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __max__.speed = 100.0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __default__.speed = 10.0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(StageConfig::AbstractParamDescriptionConstPtr(new StageConfig::ParamDescription<double>("speed", "double", 0, "Simulation speed", "", &StageConfig::speed)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(StageConfig::AbstractParamDescriptionConstPtr(new StageConfig::ParamDescription<double>("speed", "double", 0, "Simulation speed", "", &StageConfig::speed)));
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(StageConfig::AbstractGroupDescriptionConstPtr(new StageConfig::GroupDescription<StageConfig::DEFAULT, StageConfig>(Default)));
-//#line 353 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
+//#line 356 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
       for (std::vector<StageConfig::AbstractGroupDescriptionConstPtr>::const_iterator i = __group_descriptions__.begin(); i != __group_descriptions__.end(); ++i)
       {

@@ -55,10 +55,10 @@ namespace amr_perception
     class ParamDescription : public AbstractParamDescription
     {
     public:
-      ParamDescription(std::string name, std::string type, uint32_t level, 
-          std::string description, std::string edit_method, T ObstacleDetectorConfig::* f) :
-        AbstractParamDescription(name, type, level, description, edit_method),
-        field(f)
+      ParamDescription(std::string a_name, std::string a_type, uint32_t a_level, 
+          std::string a_description, std::string a_edit_method, T ObstacleDetectorConfig::* a_f) :
+        AbstractParamDescription(a_name, a_type, a_level, a_description, a_edit_method),
+        field(a_f)
       {}
 
       T (ObstacleDetectorConfig::* field);
@@ -141,7 +141,7 @@ namespace amr_perception
     class GroupDescription : public AbstractGroupDescription
     {
     public:
-      GroupDescription(std::string name, std::string type, int parent, int id, bool s, T PT::* f) : AbstractGroupDescription(name, type, parent, id, s), field(f)
+      GroupDescription(std::string a_name, std::string a_type, int a_parent, int a_id, bool a_s, T PT::* a_f) : AbstractGroupDescription(a_name, a_type, a_parent, a_id, a_s), field(a_f)
       {
       }
 
@@ -240,7 +240,7 @@ class DEFAULT
 
 
 
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       double safe_distance;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -367,6 +367,9 @@ class DEFAULT
   template <> // Max and min are ignored for strings.
   inline void ObstacleDetectorConfig::ParamDescription<std::string>::clamp(ObstacleDetectorConfig &config, const ObstacleDetectorConfig &max, const ObstacleDetectorConfig &min) const
   {
+    (void) config;
+    (void) min;
+    (void) max;
     return;
   }
 
@@ -377,21 +380,21 @@ class DEFAULT
     ObstacleDetectorConfigStatics()
     {
 ObstacleDetectorConfig::GroupDescription<ObstacleDetectorConfig::DEFAULT, ObstacleDetectorConfig> Default("Default", "", 0, 0, true, &ObstacleDetectorConfig::groups);
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __min__.safe_distance = 0.0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __max__.safe_distance = 2.0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __default__.safe_distance = 0.3;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(ObstacleDetectorConfig::AbstractParamDescriptionConstPtr(new ObstacleDetectorConfig::ParamDescription<double>("safe_distance", "double", 0, "Safe distance", "", &ObstacleDetectorConfig::safe_distance)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(ObstacleDetectorConfig::AbstractParamDescriptionConstPtr(new ObstacleDetectorConfig::ParamDescription<double>("safe_distance", "double", 0, "Safe distance", "", &ObstacleDetectorConfig::safe_distance)));
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(ObstacleDetectorConfig::AbstractGroupDescriptionConstPtr(new ObstacleDetectorConfig::GroupDescription<ObstacleDetectorConfig::DEFAULT, ObstacleDetectorConfig>(Default)));
-//#line 353 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
+//#line 356 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
       for (std::vector<ObstacleDetectorConfig::AbstractGroupDescriptionConstPtr>::const_iterator i = __group_descriptions__.begin(); i != __group_descriptions__.end(); ++i)
       {

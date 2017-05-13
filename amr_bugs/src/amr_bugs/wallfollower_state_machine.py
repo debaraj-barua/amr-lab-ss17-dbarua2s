@@ -165,12 +165,33 @@ def set_config(self, config):
 """
 Defining new methods::
 """
+def transition_search(userdata):
+        rospy.loginfo("Transitioning")
+        tolerance=0.05
+        #==============================================================================
+        #         Find direction to be alligned to, left or right
+        #==============================================================================
+        if(userdata.direction==1):  #follow on right
+            side_1=userdata.right_1
+            side_2=userdata.right_2
+            angular_velo=-userdata.default_rotational_speed
+        else:  # follow on left
+            side_1=userdata.left_1
+            side_2=userdata.left_2
+            angular_velo=userdata.default_rotational_speed    
+        
+        if (max(side_1,side_2) < userdata.clearance+tolerance and abs(side_1-side_2) < tolerance):
+           userdata.velocity = (0, 0, 0)
+           return 'found_wall'
+        userdata.velocity = (0, 0, angular_velo)
+
+
 def align(userdata):
     
     tolerance=0.05
     if userdata.direction==1:
                 rospy.loginfo("Aligning to Right")
-                angular_speed = userdata.default_rotational_speed
+                angular_speed = -userdata.default_rotational_speed
          
                 if (abs(userdata.right_1-userdata.right_2) < tolerance and 
                     max(userdata.right_1,userdata.right_2)<=userdata.clearance+tolerance):
@@ -183,7 +204,7 @@ def align(userdata):
 
     else:
                 rospy.loginfo("Aligning to Left")
-                angular_speed = -userdata.default_rotational_speed
+                angular_speed = userdata.default_rotational_speed
                 
                 if (abs(userdata.left_1-userdata.left_2) < tolerance and 
                     min(userdata.left_1,userdata.left_2)<=userdata.clearance+tolerance):
@@ -291,7 +312,7 @@ def convex(userdata):
             if(userdata.front_right>userdata.clearance*5 or max(userdata.right_1,userdata.right_2)>userdata.clearance*6):
                     
                 userdata.velocity=(userdata.max_forward_velocity,
-                                    userdata.max_forward_velocity/4,
+                                    userdata.max_forward_velocity/7,
                                     -userdata.default_rotational_speed)
                 
             else:
@@ -302,37 +323,12 @@ def convex(userdata):
             if(userdata.front_left>userdata.clearance*5 or max(userdata.left_1,userdata.left_2)>userdata.clearance*6):
                 
                 userdata.velocity=(userdata.max_forward_velocity,
-                                    -userdata.max_forward_velocity/4,
+                                    -userdata.max_forward_velocity/7,
                                     userdata.default_rotational_speed) 
                 
             else:
                 userdata.velocity=(0,0,0)
                 return 'navigated'
-
-
-
-
-
-def transition_search(userdata):
-        rospy.loginfo("Transitioning")
-        tolerance=0.1
-        #==============================================================================
-        #         Find direction to be alligned to, left or right
-        #==============================================================================
-        if(userdata.direction==1):  #follow on right
-            side_1=userdata.right_1
-            side_2=userdata.right_2
-            angular_velo=-userdata.default_rotational_speed
-        else:  # follow on left
-            side_1=userdata.left_1
-            side_2=userdata.left_2
-            angular_velo=userdata.default_rotational_speed    
-        
-        if (min(side_1,side_2) < userdata.clearance+tolerance and abs(side_1-side_2) < tolerance):
-           userdata.velocity = (0, 0, 0)
-           return 'found_wall'
-        userdata.velocity = (0, 0, angular_velo)
-
 
 def stop(userdata):
    

@@ -55,10 +55,10 @@ namespace amr_perception
     class ParamDescription : public AbstractParamDescription
     {
     public:
-      ParamDescription(std::string name, std::string type, uint32_t level, 
-          std::string description, std::string edit_method, T LaserRepublisherConfig::* f) :
-        AbstractParamDescription(name, type, level, description, edit_method),
-        field(f)
+      ParamDescription(std::string a_name, std::string a_type, uint32_t a_level, 
+          std::string a_description, std::string a_edit_method, T LaserRepublisherConfig::* a_f) :
+        AbstractParamDescription(a_name, a_type, a_level, a_description, a_edit_method),
+        field(a_f)
       {}
 
       T (LaserRepublisherConfig::* field);
@@ -141,7 +141,7 @@ namespace amr_perception
     class GroupDescription : public AbstractGroupDescription
     {
     public:
-      GroupDescription(std::string name, std::string type, int parent, int id, bool s, T PT::* f) : AbstractGroupDescription(name, type, parent, id, s), field(f)
+      GroupDescription(std::string a_name, std::string a_type, int a_parent, int a_id, bool a_s, T PT::* a_f) : AbstractGroupDescription(a_name, a_type, a_parent, a_id, a_s), field(a_f)
       {
       }
 
@@ -240,7 +240,7 @@ class DEFAULT
 
 
 
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       int rate;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -367,6 +367,9 @@ class DEFAULT
   template <> // Max and min are ignored for strings.
   inline void LaserRepublisherConfig::ParamDescription<std::string>::clamp(LaserRepublisherConfig &config, const LaserRepublisherConfig &max, const LaserRepublisherConfig &min) const
   {
+    (void) config;
+    (void) min;
+    (void) max;
     return;
   }
 
@@ -377,21 +380,21 @@ class DEFAULT
     LaserRepublisherConfigStatics()
     {
 LaserRepublisherConfig::GroupDescription<LaserRepublisherConfig::DEFAULT, LaserRepublisherConfig> Default("Default", "", 0, 0, true, &LaserRepublisherConfig::groups);
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __min__.rate = 100;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __max__.rate = 10;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __default__.rate = 0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(LaserRepublisherConfig::AbstractParamDescriptionConstPtr(new LaserRepublisherConfig::ParamDescription<int>("rate", "int", 0, "publish rate", "", &LaserRepublisherConfig::rate)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 273 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(LaserRepublisherConfig::AbstractParamDescriptionConstPtr(new LaserRepublisherConfig::ParamDescription<int>("rate", "int", 0, "publish rate", "", &LaserRepublisherConfig::rate)));
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(LaserRepublisherConfig::AbstractGroupDescriptionConstPtr(new LaserRepublisherConfig::GroupDescription<LaserRepublisherConfig::DEFAULT, LaserRepublisherConfig>(Default)));
-//#line 353 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
+//#line 356 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
       for (std::vector<LaserRepublisherConfig::AbstractGroupDescriptionConstPtr>::const_iterator i = __group_descriptions__.begin(); i != __group_descriptions__.end(); ++i)
       {
