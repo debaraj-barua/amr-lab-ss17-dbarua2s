@@ -20,6 +20,20 @@ The constructed state machine is preemptable, i.e. each state checks whether
 a preemption is requested and returns 'preempted' if that is the case.
 """
 
+"""
+#==============================================================================
+#                       State Descriptions
+#                       ------------------
+#   1) SEARCH            : Used to search for any wall, used during initialization
+#   2) ALIGN             : Used to alignt to a wall, accroding to mode selected
+#   3) FOLLOW_WALL       : Used to follow a wall once aligned 
+#   4) TRANSITION_SEARCH : If mode is changed during wall following, this is 
+#                          used to search for wall in the required direction
+#   5) CONVEX            : Used ro navigate door ways, i.e, convex turns
+#   5) CONCAVE           : Used to navigate corners, i.e., concave turns 
+#==============================================================================
+"""
+
 PACKAGE = 'amr_bugs'
 
 import roslib
@@ -27,9 +41,6 @@ roslib.load_manifest(PACKAGE)
 import smach
 import rospy
 from preemptable_state import PreemptableState
-from math import log
-from math import cos
-from math import pi
 from math import copysign
 from types import MethodType
 from geometry_msgs.msg import Twist
@@ -60,15 +71,16 @@ __all__ = ['construct']
 #               ud.velocity = (1, 0, 0)
 #==============================================================================
 
+#==============================================================================
+#    SEARCH            : Used to search for any wall, used during initialization
+#==============================================================================
 def search(ud):
        rospy.loginfo("Searching")
        if ud.front_min < ud.clearance:
            ud.velocity = (0, 0, 0)
            return 'found_wall'
        ud.velocity = (0.3, 0, 0)
-       
-
-
+      
 def set_ranges(self, ranges):
     """
     This function will be attached to the constructed wallfollower machine.
@@ -165,6 +177,11 @@ def set_config(self, config):
 """
 Defining new methods::
 """
+
+#==============================================================================
+# TRANSITION_SEARCH : If mode is changed during wall following, this is
+#                     used to search for wall in the required direction
+#==============================================================================
 def transition_search(userdata):
         rospy.loginfo("Transitioning")
         tolerance=0.05
@@ -185,10 +202,13 @@ def transition_search(userdata):
            return 'found_wall'
         userdata.velocity = (0, 0, angular_velo)
 
-
+#   ALIGN             : Used to alignt to a wall, accroding to mode selected
 def align(userdata):
     
     tolerance=0.05
+    #==============================================================================
+    #         Find direction to be alligned to, left or right
+    #==============================================================================
     if userdata.direction==1:
                 rospy.loginfo("Aligning to Right")
                 angular_speed = -userdata.default_rotational_speed
@@ -215,9 +235,9 @@ def align(userdata):
                 else:
                     userdata.velocity = (0,0,angular_speed)
 
-    
-
-   
+#==============================================================================
+#   FOLLOW_WALL       : Used to follow a wall once aligned   
+#==============================================================================
 def follow_wall(userdata):
         f_min=userdata.front_min
         tolerance=0.1
@@ -251,19 +271,23 @@ def follow_wall(userdata):
         
          
         #==============================================================================
-        #         Alligning Robot for uneven walls        
+        #         Aligning Robot for uneven walls        
         #==============================================================================
-        if (side_2>userdata.clearance+tolerance and side_1>userdata.clearance+tolerance):  #align offsets to wall
+        
+        #align lateral offsets to wall
+        if (side_2>userdata.clearance+tolerance and side_1>userdata.clearance+tolerance):  
                rospy.loginfo("Correcting Offsets")  
                userdata.velocity=(0.01, copysign(0.05,(-angular_velo)),0)           
         
-        elif(abs(side_1-side_2)>0.02 and side_2<userdata.clearance+tolerance and side_1<userdata.clearance+tolerance):    # rotate while moving to maitain orientation
+        #rotate while moving to maitain orientation
+        elif(abs(side_1-side_2)>0.02 and side_2<userdata.clearance+tolerance 
+            and side_1<userdata.clearance+tolerance):   
             rospy.loginfo("Following with angular adjustments")            
             userdata.velocity=(0.3,0,
                             ((side_2-side_1)/abs(side_2-side_1))*angular_velo)
                             
-                
-        else:                                                      # go straight
+        # go straight       
+        else:                                                      
             rospy.loginfo("Following Straight")
             userdata.velocity=(0.3,0,0)
         
@@ -277,7 +301,6 @@ def concave(userdata):
         #         Find direction to be alligned to, left or right
         #==============================================================================        
         if(userdata.direction==1):  #follow on right
-        #check fot the clearance with repect to  the corner sensors 
             if(userdata.front_1<userdata.clearance*2 or 
                 userdata.front_2<userdata.clearance*2 or 
                 userdata.front_right<userdata.clearance*2 ):
@@ -329,13 +352,13 @@ def convex(userdata):
             else:
                 userdata.velocity=(0,0,0)
                 return 'navigated'
-
+"""
 def stop(userdata):
    
     rospy.loginfo("Stopping")
     userdata.velocity = (0, 0, 0)
     return 'stop'
-
+"""
 def construct():
     sm = smach.StateMachine(outcomes=['preempted'])
     # Attach helper functions
@@ -380,11 +403,18 @@ def construct():
         # Note: The first state that you add will become the initial state of
         #       the state machine.
         #======================================================================
+        
+        #==============================================================================
+        # SEARCH            : Used to search for any wall, used during initialization        
+        #==============================================================================
         smach.StateMachine.add('SEARCH',PreemptableState(search,input_keys=['front_min','clearance'],
                                                                    output_keys=['velocity'],
                                                                    outcomes=['found_wall']),
                                                                     transitions={'found_wall': 'ALIGN'})
         
+        #==============================================================================
+        # ALIGN             : Used to alignt to a wall, accroding to mode selected        
+        #==============================================================================
         smach.StateMachine.add('ALIGN',PreemptableState(align,input_keys=['front_min', 'clearance',
                                                                             'left_1','left_2',
                                                                             'right_1','right_2',
@@ -393,7 +423,9 @@ def construct():
                                                                    outcomes=['aligned']),
                                                                    transitions={'aligned': 'FOLLOW_WALL'})
         
-        
+        #==============================================================================
+        #    FOLLOW_WALL       : Used to follow a wall once aligned   
+        #==============================================================================
         smach.StateMachine.add('FOLLOW_WALL',PreemptableState(follow_wall,input_keys=['front_min', 'clearance',
                                                                                       'left_1','left_2',
                                                                                       'right_1','right_2',
@@ -405,7 +437,11 @@ def construct():
                                                                                  'no_wall':'TRANSITION_SEARCH',
                                                                                  'convex':'CONVEX',
                                                                                  'align' : 'ALIGN'})
-        
+                                                                                 
+        #==============================================================================
+        # TRANSITION_SEARCH : If mode is changed during wall following, this is
+        #                     used to search for wall in the required direction
+        #==============================================================================                                                                                 
         smach.StateMachine.add('TRANSITION_SEARCH',PreemptableState(transition_search,input_keys=['clearance','front_min',
                                                                                       'left_1','left_2',
                                                                                       'right_1','right_2',
@@ -413,7 +449,10 @@ def construct():
                                                                    output_keys=['velocity'],
                                                                    outcomes=['found_wall']),
                                                                     transitions={'found_wall': 'ALIGN'})  
-                                                                    
+        
+        #==============================================================================
+        # Concave State is called to manoeuvre corners with walls straight ahead
+        #==============================================================================                                                           
         smach.StateMachine.add('CONCAVE', PreemptableState(concave,input_keys=['front_min', 'clearance',
                                                                                'front_1','front_2',
                                                                                 'left_1','left_2',
@@ -423,7 +462,10 @@ def construct():
                                                                     output_keys=['velocity'],
                                                                     outcomes=['navigated']),
                                                                     transitions={'navigated': 'FOLLOW_WALL' })
-                                                                    
+
+        #==============================================================================
+        # Convex State is called to manoeuvre corners with gaps in walls (like doors)
+        #==============================================================================                                                                    
         smach.StateMachine.add('CONVEX', PreemptableState(convex,input_keys=['front_min', 'clearance','max_forward_velocity',
                                                                                'front_1','front_2',
                                                                                 'left_1','left_2',
@@ -434,10 +476,12 @@ def construct():
                                                                     outcomes=['navigated']),
                                                                     transitions={'navigated': 'FOLLOW_WALL' })                                                                    
         
+        """
+        #STOP state was used as a redundant temporary state for undefined states
         smach.StateMachine.add('STOP',PreemptableState(stop,input_keys=['front_min','clearance'],
                                                                    output_keys=['velocity'],
                                                                    outcomes=['stop']),
                                                                     transitions={'stop': 'STOP'})
-           
+        """           
     
     return sm
