@@ -3,7 +3,7 @@
 
   <!-- Stage node with "rooms" world -->
   <include file="$(find amr_stage)/launch/stage.launch">
-    <arg name="world" value="simple"/>
+    <arg name="world" value="rooms"/>
   </include>
 
   <!-- Wallfollower node -->
