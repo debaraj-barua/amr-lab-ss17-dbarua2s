@@ -211,7 +211,7 @@ def align(userdata):
     #==============================================================================
     if userdata.direction==1:
                 rospy.loginfo("Aligning to Right")
-                angular_speed = -userdata.default_rotational_speed
+                angular_speed = userdata.default_rotational_speed
          
                 if (abs(userdata.right_1-userdata.right_2) < tolerance and 
                     max(userdata.right_1,userdata.right_2)<=userdata.clearance+tolerance):
@@ -224,7 +224,7 @@ def align(userdata):
 
     else:
                 rospy.loginfo("Aligning to Left")
-                angular_speed = userdata.default_rotational_speed
+                angular_speed = -userdata.default_rotational_speed
                 
                 if (abs(userdata.left_1-userdata.left_2) < tolerance and 
                     min(userdata.left_1,userdata.left_2)<=userdata.clearance+tolerance):
@@ -250,11 +250,13 @@ def follow_wall(userdata):
             side_2=userdata.right_2
             f_corner=userdata.front_right
             angular_velo=userdata.default_rotational_speed
+            back_side=userdata.back_right
         else:  # follow on left
             side_1=userdata.left_1
             side_2=userdata.left_2
             f_corner=userdata.front_left
-            angular_velo=-userdata.default_rotational_speed    
+            angular_velo=-userdata.default_rotational_speed  
+            back_side=userdata.back_left
         
         #==============================================================================
         #         Checking ahead for corners, doors and lost wall conditions
@@ -266,30 +268,37 @@ def follow_wall(userdata):
             min(side_1,side_2)>userdata.clearance*3 and 
             f_corner>userdata.clearance*5):    #if it get lost then go find a wall
             return 'no_wall'
-        if(abs(f_corner)>userdata.clearance*5 or max(side_1,side_2)>userdata.clearance*6):  #if there is opening then go to door
-            return 'convex'          
+        if(abs(f_corner)>userdata.clearance*5 or max(side_1,side_2)>userdata.clearance+tolerance):  #if there is opening then go to door
+            #return 'convex'          
+             rospy.loginfo("Convex Turning")
+             userdata.velocity=(userdata.max_forward_velocity,
+                                     userdata.clearance-min(side_1,side_2),
+                                     (side_2-side_1)*1.7 )
+
         
          
         #==============================================================================
         #         Aligning Robot for uneven walls        
         #==============================================================================
-        
+
         #align lateral offsets to wall
-        if (side_2>userdata.clearance+tolerance and side_1>userdata.clearance+tolerance):  
+        if (((max(side_2,side_1)>userdata.clearance+tolerance) and back_side>userdata.clearance+tolerance)
+            or (min(side_2,side_1)<userdata.clearance+tolerance and back_side<userdata.clearance+tolerance)):  
                rospy.loginfo("Correcting Offsets")  
-               userdata.velocity=(0.01, copysign(0.05,(-angular_velo)),0)           
-        
+               userdata.velocity=(0.01, userdata.clearance-min(side_1,side_2),(side_2-side_1))          
+               #userdata.velocity=(0.01, userdata.clearance-min(side_1,side_2) ,0)  
+
         #rotate while moving to maitain orientation
-        elif(abs(side_1-side_2)>0.02 and side_2<userdata.clearance+tolerance 
+        if(abs(side_1-side_2)>0.02 and side_2<userdata.clearance+tolerance 
             and side_1<userdata.clearance+tolerance):   
             rospy.loginfo("Following with angular adjustments")            
             userdata.velocity=(0.3,0,
                             ((side_2-side_1)/abs(side_2-side_1))*angular_velo)
                             
         # go straight       
-        else:                                                      
+        elif side_1==userdata.clearance+tolerance :                                                      
             rospy.loginfo("Following Straight")
-            userdata.velocity=(0.3,0,0)
+            userdata.velocity=(userdata.max_forward_velocity,0,0)
         
         
 #==============================================================================
@@ -332,22 +341,41 @@ def convex(userdata):
         #==============================================================================        
         if(userdata.direction==1):  #follow on right
         #check fot the clearance with repect to  the corner sensors 
-            if(userdata.front_right>userdata.clearance*5 or max(userdata.right_1,userdata.right_2)>userdata.clearance*6):
+            if(userdata.front_right>userdata.clearance*3 or max(userdata.right_2,userdata.right_1)>userdata.clearance):
                     
-                userdata.velocity=(userdata.max_forward_velocity,
-                                    userdata.max_forward_velocity/7,
-                                    -userdata.default_rotational_speed)
+#==============================================================================
+#                 userdata.velocity=(userdata.max_forward_velocity,
+#                                     userdata.max_forward_velocity/7,
+#                                     -userdata.default_rotational_speed)
+#==============================================================================
+                 rospy.loginfo("Navigating Convex Right")
+                 
+                 #if(min(userdata.left_1,userdata.left_2))
+                 
+                 userdata.velocity=(userdata.max_forward_velocity,
+                                    #(userdata.clearance-min(userdata.left_1,userdata.left_2))*0.05,
+                                    0,
+                                    (userdata.right_2-userdata.right_1)*1.7 )
+                
                 
             else:
                 userdata.velocity=(0,0,0)
                 return 'navigated'
         
         else:   #follow on left
-            if(userdata.front_left>userdata.clearance*5 or max(userdata.left_1,userdata.left_2)>userdata.clearance*6):
+            if(userdata.front_left>userdata.clearance*2 or max(userdata.left_2,userdata.left_1)>userdata.clearance):
                 
-                userdata.velocity=(userdata.max_forward_velocity,
-                                    -userdata.max_forward_velocity/7,
-                                    userdata.default_rotational_speed) 
+#==============================================================================
+#                 userdata.velocity=(userdata.max_forward_velocity,
+#                                     -userdata.max_forward_velocity/7,
+#                                     userdata.default_rotational_speed) 
+#                 
+#==============================================================================
+                
+                 userdata.velocity=(userdata.max_forward_velocity,
+                                    #(userdata.clearance-min(userdata.left_1,userdata.left_2))*0.05,
+                                    0,
+                                    (userdata.left_2-userdata.left_1)*1.7 ) 
                 
             else:
                 userdata.velocity=(0,0,0)
@@ -368,7 +396,7 @@ def construct():
     # Set initial values in userdata
     sm.userdata.velocity = (0, 0, 0)
     sm.userdata.mode = 1
-    sm.userdata.clearance = 0.5
+    sm.userdata.clearance = 0.7
     sm.userdata.ranges = None
     sm.userdata.max_forward_velocity = 0.3
     sm.userdata.default_rotational_speed = 0.5
@@ -430,7 +458,8 @@ def construct():
                                                                                       'left_1','left_2',
                                                                                       'right_1','right_2',
                                                                                       'front_right','front_left',
-                                                                                      'direction','default_rotational_speed'],
+                                                                                      'direction','default_rotational_speed',
+                                                                                      'max_forward_velocity','back_right','back_left'],
                                                                    output_keys=['velocity'],
                                                                    outcomes=['concave','no_wall','convex','align']),
                                                                    transitions={'concave': 'CONCAVE',
