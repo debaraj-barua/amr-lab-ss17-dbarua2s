@@ -159,7 +159,7 @@ class BugBrain:
                 rospy.loginfo(len(self.begin_point_list))    
                 rospy.loginfo("Max Lap:")
                 rospy.loginfo(self.begin_point_list[x][1])
-                if (self.begin_point_list[x][1]>2):
+                if (self.begin_point_list[x][1]>=2):
                     return True
             
         return False
